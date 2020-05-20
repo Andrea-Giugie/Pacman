@@ -19,7 +19,7 @@ let underscore = '_'
 let vuoto = '*'
 
 let default_flip_queue = 2  // double buffering
-let default_fps_cap = 30
+let default_fps_cap = 240
 
 let log_pipe_name = "LogPipe"
 let log_pipe_translate_eol = '\255'

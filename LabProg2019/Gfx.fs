@@ -26,6 +26,8 @@ type cell () =  //todo sposta quando capisci come fare un altro file
     member val rightWall = true with get, set
     member val leftWall = true with get,set
     member val finishLine = false with get,set
+    member val enemy = false with get,set
+    member val coin = false with get,set
     override this . ToString () =
         let sb = new StringBuilder ()
         if this.topWall then sb.Append 'T' |> ignore
@@ -155,6 +157,11 @@ type wronly_raster (w, h) =
             this.draw_line (x1,y1,x1,y1,underscore)//modifico angolo in bassodx
             this.draw_line (x1, y0, x1, y0, underscore)//modifico angolo in altodx
         if(cella.bottomWall=true || cella.visited=false) then  this.draw_line (x1-1, y1, x0+1, y1, underscore)else this.draw_line (x1-1, y1, x0+1, y1, blank)     //bottom
+        if(cella.coin=true) then 
+            this.draw_circle(w/2,h/2,0,CharInfo.create(Config.filled_pixel_char,Color.Yellow))
+        if(cella.enemy=true) then 
+            this.draw_circle(w/2,h/2,0,CharInfo.create(Config.filled_pixel_char,Color.Red))
+
         
               
     /// Draw a circle with (x0, y0) as center and r as ray, using px as pixel.

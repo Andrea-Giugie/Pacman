@@ -148,9 +148,16 @@ type maze(w , h ,solve:bool) =
          if j = w-1 then this.Struttura.[i,j].bottomWall<-false
          this.Struttura.[i,j].finishLine<-true
         //reset visited<-false
+         let r = System.Random()
+         //Eventuale reset del labirinto + coin + nemici
          for i in 0..h-1 do 
             for j in 0..w-1 do
             this.Struttura.[i,j].visited<- solve
+            if r.Next(0,50)=1 then
+                this.Struttura.[i,j].enemy<-true
+            else if r.Next(0,10)=1 && i<>0 && j<>0 then
+                    this.Struttura.[i,j].coin<-true
+            
          this.Struttura.[0,0].visited<-true
             
      //La prima cella e' visitata sicuramente
