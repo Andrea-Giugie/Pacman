@@ -10,11 +10,9 @@ open External
 open Gfx
 open System
 open System.Text
-
-
+open Engine
 
 [<Diagnostics.DebuggerDisplay("{ ToString ()}")>]
-
 
 type CharInfo with
     /// Shortcut for creating a wall pixel.
@@ -24,7 +22,17 @@ type CharInfo with
     /// Check whether this pixel is a wall.
     member this.isWall = this = pixel.wall
 
-let getRandomVicino(x:int,y:int,maxX:int,maxY:int,matrice:cell[,])=
+[< NoEquality; NoComparison >]
+type state = {
+    player : sprite
+    sprites: sprite[]
+    score:int
+}
+let exists (x : 'a option) =
+    match x with
+    | Some(x) -> true
+    | None -> false
+let getRandomVicino(x:int,y:int,maxX:int,maxY:int,matrice:cell[,] )=       
     let mutable i = 0
     let l =[|
         if((x-1)>=0 && (x-1)<maxX && y>=0 && y<maxY && (matrice.[x-1,y].visited=false) ) then yield false,(matrice.[x-1,y]);i<-i+1   //Sinistra
@@ -50,6 +58,20 @@ let getPossiblePath(x:int,y:int,maxX:int,maxY:int,matrice:cell[,])=
         (true, (new cell()))
     else l.[r]
 
+
+let getPossiblePathNemico(x:int,y:int,maxX:int,maxY:int,matrice:cell[,])=
+    let mutable i = 0
+    let l =[|
+        if((x-1)>=0 && (x-1)<maxX && y>=0 && y<maxY && matrice.[x,y].topWall=false) && matrice.[x-1,y].enemy=false then yield false,(matrice.[x-1,y]);i<-i+1   //Sinistra
+        if((x+1)>=0 && (x+1)<maxX && y>=0 && y<maxY && matrice.[x,y].bottomWall=false ) && matrice.[x+1,y].enemy=false then yield false,(matrice.[x+1,y]);i<-i+1     //Destra
+        if((x)>=0 && x<maxX && (y-1)>=0 && (y-1)<maxY && matrice.[x,y].leftWall=false) && matrice.[x,y-1].enemy=false then yield false,(matrice.[x,y-1]);i<-i+1     //Sopra
+        if((x)>=0 && x<maxX && (y+1)>=0 && (y+1)<maxY && matrice.[x,y].rightWall=false )&& matrice.[x,y+1].enemy=false then yield false,(matrice.[x,y+1]);i<-i+1     //Sotto
+    |]
+    let r = System.Random().Next(0, i)
+    if i = 0 then 
+        (true, (new cell()))
+    else l.[r]
+
 let getBool((b,c):bool*cell)=b
 let getCell((b,c):bool*cell)=c
 
@@ -58,7 +80,6 @@ let rec push(l:'a list, elemento:'a)=
         |[]->[elemento]
         |[x] -> [x]@[elemento]
         |x::xs->x::push(xs,elemento)
-
         
 let cancellaMuri(c1:cell,c2:cell)=
     let Deltax = c1.x-c2.x
@@ -161,18 +182,38 @@ type maze(w , h ,solve:bool) =
          this.Struttura.[0,0].visited<-true
             
      //La prima cella e' visitata sicuramente
-let MuoviNemici(maze:maze,h:int,w:int)=
-    for i in 0..h-1 do 
-        for j in 0..w-1 do
+let trovaNemici(maze:maze,h:int,w:int)=
+    let mutable nemici: cell List=[]
+    for i in 0..w-1 do 
+        for j in 0..h-1 do
             if maze.Struttura.[i,j].enemy=true then
-                let CellaInCuiMiSposto=getRandomVicino(i,j,h,w,maze.Struttura)
-                getCell(CellaInCuiMiSposto).enemy<-true
-                maze.Struttura.[i,j].enemy<-false
-                Log.msg "Ho trovato uno stronzo"
+                let a = maze.Struttura.[i,j]
+                nemici<-push(nemici,a)
+    nemici
+let MuoviNemici(maze:maze,h:int,w:int,st:state,engine:engine,grandezzaCella:int)=
+    let nemici:cell list=trovaNemici(maze,h,w)
+    for i in 0..nemici.Length-1 do
+        Log.msg "Ho mosso uno sprite"
+        let CellaInCuiMiSposto=getPossiblePathNemico(nemici.[i].y,nemici.[i].x,h,w,maze.Struttura)
+        if getBool(CellaInCuiMiSposto)=false then
+            getCell(CellaInCuiMiSposto).enemy<-true
+            nemici.[i].enemy<-false
 
+            //Sovrascrivo lo sprite vecchio
+            let immagine = image.cella (grandezzaCella, grandezzaCella, Color.Blue,nemici.[i])
+            let NumeroMappato=nemici.[i].x+nemici.[i].y*h
+            st.sprites.[NumeroMappato].clear
+            st.sprites.[NumeroMappato]<-new sprite (immagine, int st.sprites.[NumeroMappato].x, int st.sprites.[NumeroMappato].y, int st.sprites.[NumeroMappato].z+1)
+            engine.register_sprite st.sprites.[NumeroMappato]
+            // Sovrascrivo lo sprite nuovo
+            let immagine = image.cella (grandezzaCella, grandezzaCella, Color.Blue,getCell(CellaInCuiMiSposto))
+            let NumeroMappato=(getCell(CellaInCuiMiSposto).x)+(getCell(CellaInCuiMiSposto).y)*h
+            st.sprites.[NumeroMappato].clear
+            st.sprites.[NumeroMappato]<-new sprite (immagine, int st.sprites.[NumeroMappato].x, int st.sprites.[NumeroMappato].y, int st.sprites.[NumeroMappato].z+1)
+            engine.register_sprite st.sprites.[NumeroMappato]
+               
 
-
-    Log.msg "Ho mosso tutto"
+    
 
                      
 

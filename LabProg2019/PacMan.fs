@@ -13,15 +13,10 @@ open Maze
 open System.Text
     
 
-[< NoEquality; NoComparison >]
-type state = {
-    player : sprite
-    sprites: sprite[]
-    score:int
-}
+
 let R = 15 //righe i
 let C = 15  //colonne j
-let GrandezzaCella=3
+let GrandezzaCella=5
 let centroCella = GrandezzaCella/2
 
 let genRandomNumbers count =
@@ -57,10 +52,10 @@ let main () =
         if vinto=false then
             match key with
                 |None-> //Devo trovare tutti i nemici e farli muovere a caso
-                        if inf.timer-MovimentoNemici > 1. then
-                            Log.msg "Devo muovere"
+                        if inf.timer-MovimentoNemici > 0.1 then
+                            Log.msg "Devo muovere %f"inf.timer
                             MovimentoNemici<-inf.timer
-                            Maze.MuoviNemici(maze,C,R)
+                            Maze.MuoviNemici(maze,C,R,st,engine,GrandezzaCella)
                 |Some key->
                     let dx, dy =
                         match key.KeyChar with 
