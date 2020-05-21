@@ -60,6 +60,7 @@ let main () =
                         if inf.timer-MovimentoNemici > 1. then
                             Log.msg "Devo muovere"
                             MovimentoNemici<-inf.timer
+                            Maze.MuoviNemici(maze,C,R)
                 |Some key->
                     let dx, dy =
                         match key.KeyChar with 
@@ -91,10 +92,7 @@ let main () =
                             if cella.enemy=true then
                                 Log.msg "HAI PERSO"
                                 vinto<-true
-                                
-                                
-        
-            
+                               
                             let NumeroMappato=fixedx+fixedy*C
                             // if st.sprites.[NumeroMappato].z = 0 then //Solo quando non è mai stato sovrascritto
                             let immagine = image.cella (GrandezzaCella, GrandezzaCella, Color.Blue,cella)

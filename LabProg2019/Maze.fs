@@ -147,7 +147,7 @@ type maze(w , h ,solve:bool) =
          if i = h-1 then this.Struttura.[i,j].rightWall<-false
          if j = w-1 then this.Struttura.[i,j].bottomWall<-false
          this.Struttura.[i,j].finishLine<-true
-        //reset visited<-false
+         //reset visited<-false
          let r = System.Random()
          //Eventuale reset del labirinto + coin + nemici
          for i in 0..h-1 do 
@@ -161,7 +161,18 @@ type maze(w , h ,solve:bool) =
          this.Struttura.[0,0].visited<-true
             
      //La prima cella e' visitata sicuramente
-         
+let MuoviNemici(maze:maze,h:int,w:int)=
+    for i in 0..h-1 do 
+        for j in 0..w-1 do
+            if maze.Struttura.[i,j].enemy=true then
+                let CellaInCuiMiSposto=getRandomVicino(i,j,h,w,maze.Struttura)
+                getCell(CellaInCuiMiSposto).enemy<-true
+                maze.Struttura.[i,j].enemy<-false
+                Log.msg "Ho trovato uno stronzo"
+
+
+
+    Log.msg "Ho mosso tutto"
 
                      
 
