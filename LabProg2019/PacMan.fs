@@ -73,6 +73,12 @@ let main () =
                             Log.msg "Devo muovere %f"inf.timer
                             MovimentoNemici<-inf.timer
                             Maze.MuoviNemici(maze,C,R,st,engine,GrandezzaCella)
+
+                            let fixedx = ((int st.player.x)-centroCella)/GrandezzaCella
+                            let fixedy = ((int st.player.y)-centroCella)/GrandezzaCella
+                            if maze.getByCoordinates(fixedx,fixedy).enemy=true then
+                                 Log.msg "Hai perso! Monete raccolte: %d/%d"st.score maze.monete
+                                 vinto<-true
                         if inf.timer-TimerTrapano>5. then
                             TrapanoAttivo<-false
 
@@ -87,7 +93,7 @@ let main () =
                         | _   -> 0., 0.
                     // TODO: check bounds
                     if key.KeyChar=' ' then
-                        if inf.timer-TimerTrapano>0.0 then// *-************************************modifica in 15 
+                        if inf.timer-TimerTrapano>15.0 || inf.timer<15.0 then// *-************************************modifica in 15 
                                 TimerTrapano<-inf.timer
                                 TrapanoAttivo<-true
                         
@@ -98,6 +104,7 @@ let main () =
                     try //Controllo che la cella in cui voglio muovermi esiste, e che non esista un muro tra il player e la cella
                         let fixedx = ((int x)-centroCella)/GrandezzaCella
                         let fixedy = ((int y)-centroCella)/GrandezzaCella
+                        Log.msg "x: %d y: %d" fixedx fixedy
                         let currentX = ((int st.player.x)-centroCella)/GrandezzaCella
                         let currentY = ((int st.player.y)-centroCella)/GrandezzaCella
 
@@ -118,7 +125,7 @@ let main () =
                                 score<-score+1
                                 cella.coin<-false
                             if cella.enemy=true then
-                                Log.msg "HAI PERSO"
+                                Log.msg "Hai perso! Monete raccolte: %d/%d"st.score maze.monete
                                 vinto<-true
                                
                             let NumeroMappato=fixedx+fixedy*C
@@ -129,8 +136,9 @@ let main () =
                             engine.register_sprite st.sprites.[NumeroMappato]
             
                             st.player.move_by (dx, dy)
+                            
                             if cella.finishLine=true then
-                                Log.msg "HAI VINTO"
+                                Log.msg "Hai vinto! Monete raccolte: %d/%d"st.score maze.monete
                                 vinto<-true
             
                     with 

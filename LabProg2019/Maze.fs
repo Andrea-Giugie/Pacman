@@ -108,11 +108,13 @@ let labirintoVisitato(struttura:cell[,],h:int,w:int)=
     if k>0 then true else false
 type maze(w , h ,solve:bool) =
     member val Struttura:cell[,] = Array2D.create h w (new cell())
+    
 
     member this.get(x:int,y:int):cell= 
         Array2D.get this.Struttura x y
     member this.getByCoordinates(y:int,x:int):cell= 
         Array2D.get this.Struttura x y
+    member val monete:int = 0 with get,set
     member this.generate=
      //Inizializzo la matrice
          for i in 0..h-1 do 
@@ -170,6 +172,7 @@ type maze(w , h ,solve:bool) =
          this.Struttura.[i,j].finishLine<-true
          //reset visited<-false
          let r = System.Random()
+         
          //Eventuale reset del labirinto + coin + nemici
          for i in 0..h-1 do 
             for j in 0..w-1 do
@@ -177,9 +180,10 @@ type maze(w , h ,solve:bool) =
             if r.Next(0,50)=1 then
                 this.Struttura.[i,j].enemy<-true
             else if r.Next(0,10)=1 && i<>0 && j<>0 then
-                    this.Struttura.[i,j].coin<-true
-            
+                    this.monete<-this.monete+1
+                    this.Struttura.[i,j].coin<-true  
          this.Struttura.[0,0].visited<-true
+    
             
      //La prima cella e' visitata sicuramente
 let trovaNemici(maze:maze,h:int,w:int)=
